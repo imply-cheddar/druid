@@ -17,12 +17,23 @@
  * under the License.
  */
 
-package org.apache.druid.query.rowsandcols;
+package org.apache.druid.query.rowsandcols.semantic;
 
-public class MapOfColumnsRowsAndColumnsTest extends RowsAndColumnsTestBase
+import org.apache.druid.query.rowsandcols.RowsAndColumns;
+import org.apache.druid.segment.ColumnSelectorFactory;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+public interface ColumnSelectorFactoryMaker
 {
-  public MapOfColumnsRowsAndColumnsTest()
+  static ColumnSelectorFactoryMaker fromRAC(RowsAndColumns rac)
   {
-    super(MapOfColumnsRowsAndColumns.class);
+    ColumnSelectorFactoryMaker retVal = rac.as(ColumnSelectorFactoryMaker.class);
+    if (retVal == null) {
+      retVal = new DefaultColumnSelectorFactoryMaker(rac);
+    }
+    return retVal;
   }
+
+  ColumnSelectorFactory make(AtomicInteger rowIdProvider);
 }

@@ -19,10 +19,43 @@
 
 package org.apache.druid.query.rowsandcols;
 
-public class MapOfColumnsRowsAndColumnsTest extends RowsAndColumnsTestBase
+import org.apache.druid.query.rowsandcols.column.Column;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+
+public class NoAsRowsAndColumns implements RowsAndColumns
 {
-  public MapOfColumnsRowsAndColumnsTest()
+  private final RowsAndColumns rac;
+
+  public NoAsRowsAndColumns(RowsAndColumns rac)
   {
-    super(MapOfColumnsRowsAndColumns.class);
+    this.rac = rac;
+  }
+
+  @Override
+  public Collection<String> getColumnNames()
+  {
+    return rac.getColumnNames();
+  }
+
+  @Override
+  public int numRows()
+  {
+    return rac.numRows();
+  }
+
+  @Override
+  public Column findColumn(String name)
+  {
+    return rac.findColumn(name);
+  }
+
+  @Nullable
+  @Override
+  public <T> T as(Class<T> clazz)
+  {
+    // Pretend like this doesn't implement any semantic interfaces
+    return null;
   }
 }
