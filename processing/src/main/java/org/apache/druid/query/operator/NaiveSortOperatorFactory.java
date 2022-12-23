@@ -19,30 +19,41 @@
 
 package org.apache.druid.query.operator;
 
-import org.apache.druid.java.util.common.guava.Sequence;
-import org.apache.druid.query.rowsandcols.RowsAndColumns;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class SequenceOperator implements Operator
+import java.util.ArrayList;
+
+public class NaiveSortOperatorFactory implements OperatorFactory
 {
-  private final Sequence<RowsAndColumns> child;
+  private final ArrayList<ColumnWithDirection> sortColumns;
 
-  public SequenceOperator(
-      Sequence<RowsAndColumns> child
+  @JsonCreator
+  public NaiveSortOperatorFactory(
+      @JsonProperty("columns") ArrayList<ColumnWithDirection> sortColumns
   )
   {
-    this.child = child;
+    this.sortColumns = sortColumns;
+  }
+
+  @JsonProperty("columns")
+  public ArrayList<ColumnWithDirection> getSortColumns()
+  {
+    return sortColumns;
   }
 
   @Override
-  public void go(Receiver receiver)
+  public Operator wrap(Operator op)
   {
-    child.accumulate(
-        null,
-        (accumulated, in) -> {
-          receiver.push(in);
-          return accumulated;
-        }
-    );
-    receiver.completed();
+    return new NaiveSortOperator(op, sortColumns);
+  }
+
+  @Override
+  public boolean validateEquivalent(OperatorFactory other)
+  {
+    if (other instanceof NaiveSortOperatorFactory) {
+      return sortColumns.equals(((NaiveSortOperatorFactory) other).getSortColumns());
+    }
+    return false;
   }
 }
